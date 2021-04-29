@@ -1,4 +1,5 @@
 ﻿using Library.Constants;
+using Library.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,9 +10,10 @@ namespace Library.Services.Validation
     {
         public bool IsDigitsOnly(string input)
         {
+            
             foreach(var c in input)
             {
-                if (c < '0' || c > '9')
+                if ((c < '0' || c > '9' ) && c != ' ')
                 {
                     return false;
                 }
@@ -53,6 +55,19 @@ namespace Library.Services.Validation
             } else
             {
                 return true;
+            }
+        }
+
+        public bool isValidBook(Book book)
+        {
+            if (IsValidISBN(book.ISBN) && 
+                IsValidName(book.Name) &&
+                IsValidPrice(book.LoanPrice))
+            {
+                return true;
+            } else
+            {
+                return false;
             }
         }
     }

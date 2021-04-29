@@ -1,5 +1,6 @@
 ﻿using Library.Models;
 using Library.Services;
+using Library.Services.Validation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Library.Repositories
     public class LibraryRepository
     {
         private readonly IDependencyService _dependencyService;
-        public List<Book> Books { get; private set; }
+        public List<BookInfo> Books { get; private set; }
 
         public LibraryRepository() : this(new DependencyService())
         {
@@ -23,7 +24,10 @@ namespace Library.Repositories
 
         public bool Add(Book book)
         {
-           
+            if (_dependencyService.Get<IValidationService>().isValidBook(book))
+            {
+                
+            }
             return true;
         }
     }
