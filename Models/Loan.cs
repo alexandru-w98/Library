@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Library.Models
 {
-    public class Inchiriere
+    public class Loan
     {
         public string ISBN { get; set; }
-        public int DataInchiriere { get; set; }
-        public int DataInapoiere { get; set; }
+        public int LoanStartDate { get; set; }
+        public int LoanEndDate { get; set; }
     }
 }
