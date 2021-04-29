@@ -7,6 +7,6 @@ namespace Library.Models
     public class BookInfo
     {
         public Book Book { get; set; }
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = 1;
     }
 }
