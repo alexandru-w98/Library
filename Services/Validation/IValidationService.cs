@@ -9,5 +9,6 @@ namespace Library.Services.Validation
         bool IsValidName(string name);
         bool IsValidISBN(string isbn);
         bool IsValidPrice(double price);
+        bool IsDigitsOnly(string input);
     }
 }
