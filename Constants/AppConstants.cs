@@ -10,5 +10,6 @@ namespace Library.Constants
         public const int BOOK_NAME_LENGTH = 60;
 
         public const int ISBN_LENGTH = 13;
+        public const int MAX_LOAN_DAYS = 14;
     }
 }
