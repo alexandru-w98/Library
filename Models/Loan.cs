@@ -9,5 +9,6 @@ namespace Library.Models
         public string ISBN { get; set; }
         public int LoanStartDate { get; set; }
         public int LoanEndDate { get; set; }
+        public bool HasBeenReturned { get; set; }
     }
 }
