@@ -8,8 +8,10 @@ namespace Library.Constants
     {
         // Validation
         public const int BOOK_NAME_LENGTH = 60;
-
         public const int ISBN_LENGTH = 13;
+        public const int CNP_LENGTH = 13;
+
         public const int MAX_LOAN_DAYS = 14;
+
     }
 }

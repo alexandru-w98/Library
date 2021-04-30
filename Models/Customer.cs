@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Library.Models
 {
-    class Customer
+    public class Customer
     {
+        public string CNP { get; set; }
+
+        // Other Info
     }
 }
