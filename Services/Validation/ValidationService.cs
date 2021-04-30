@@ -70,5 +70,11 @@ namespace Library.Services.Validation
                 return false;
             }
         }
+
+        public bool IsValidCNP(string cnp)
+        {
+            // cnp validation
+            return true;
+        }
     }
 }

@@ -15,11 +15,24 @@ namespace Library.Repositories
         public List<BookInfo> Books { get; private set; }
         public List<Loan> LendBooks { get; private set; }
 
-        public LibraryRepository() : this(new DependencyService())
+        public LibraryRepository(List<BookInfo> availableBooks, IDependencyService dependencyService)
         {
-
+            _dependencyService = dependencyService;
+            Books = availableBooks;
+            LendBooks = new List<Loan>();
         }
-
+        public LibraryRepository(List<Loan> lendBooks, IDependencyService dependencyService)
+        {
+            _dependencyService = dependencyService;
+            Books = new List<BookInfo>();
+            LendBooks = lendBooks;
+        }
+        public LibraryRepository(List<BookInfo> books, List<Loan> lendBooks, IDependencyService dependencyService)
+        {
+            _dependencyService = dependencyService;
+            Books = books;
+            LendBooks = lendBooks;
+        }
         public LibraryRepository(IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
@@ -47,11 +60,11 @@ namespace Library.Repositories
             }
         }
         
-        public bool Lend(string isbn)
+        public bool Lend(string isbn, string cnp)
         {
             var searchedBookIndex = Books.FindIndex(item => item.Book.ISBN == isbn);
 
-            if (searchedBookIndex != -1)
+            if (searchedBookIndex != -1 && _dependencyService.Get<IValidationService>().IsValidCNP(cnp))
             {
                 if ((Books[searchedBookIndex].Quantity -= 1) == 0)
                 {
@@ -70,6 +83,11 @@ namespace Library.Repositories
             {
                 return false;
             }
+        }
+
+        public bool ReturnBook(string isbn)
+        {
+            return true;
         }
     }
 }
