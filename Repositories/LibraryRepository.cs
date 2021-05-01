@@ -183,7 +183,7 @@ namespace Library.Repositories
             {
                 try
                 {
-                    if (long.Parse(borrowing.BorrowingEndDate) <= long.Parse(currentTimestamp))
+                    if (long.Parse(borrowing.BorrowingEndDate) <= long.Parse(currentTimestamp) && !borrowing.HasBeenReturned)
                     {
                         borrowing.BorrowingPrice += AppConstants.LOAN_PENALTY * borrowing.BorrowingPrice;
                     }
