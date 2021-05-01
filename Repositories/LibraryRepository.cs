@@ -100,7 +100,9 @@ namespace Library.Repositories
                 var currentDate = DateTimeOffset.UtcNow;
                 LendBooks.Add(new Loan
                 {
+                    CNP = cnp,
                     ISBN = isbn,
+                    LoanPrice = AvailableBooks[searchedBookIndex].LoanPrice,
                     LoanStartDate = currentDate.ToUnixTimeMilliseconds().ToString(),
                     LoanEndDate = currentDate.AddDays(AppConstants.MAX_LOAN_DAYS).ToUnixTimeMilliseconds().ToString()
                 });
@@ -129,6 +131,65 @@ namespace Library.Repositories
             } else
             {
                 return false;
+            }
+        }
+
+        public void DisplayAvailableBooks()
+        {
+            foreach(var bookInfo in AvailableBooks)
+            {
+                Console.WriteLine("ISBN: " + bookInfo.Book.ISBN +
+                    " Nume: " + bookInfo.Book.Name + 
+                    " Quantity: " + bookInfo.Quantity +
+                    " Loan Price: " + bookInfo.LoanPrice);
+            }
+        }
+        
+        public void DisplayLendBooks()
+        {
+            string result = "";
+            foreach (var loan in LendBooks)
+            {
+                result += "CNP: " + loan.CNP +
+                    " Loan Start: " + loan.LoanStartDate +
+                    " Loan Duration: " + loan.LoanEndDate +
+                    " Loan Price: " + loan.LoanPrice;
+
+                result += loan.HasBeenReturned ? " Status: Returned" : " Status: Not Returned";
+            }
+
+            Console.WriteLine(result);
+        }
+
+        public int GetAvailableQuantity(string isbn)
+        {
+            var searchedBook = AvailableBooks.FirstOrDefault(bookInfo => bookInfo.Book.ISBN == isbn);
+
+            if (searchedBook != null)
+            {
+                return searchedBook.Quantity;
+            } else
+            {
+                return -1;
+            }
+        }
+
+        public void CalculateBorrowPenalty()
+        {
+            var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+
+            foreach (var loan in LendBooks)
+            {
+                try
+                {
+                    if (long.Parse(loan.LoanEndDate) <= long.Parse(currentTimestamp))
+                    {
+                        loan.LoanPrice += AppConstants.LOAN_PENALTY * loan.LoanPrice;
+                    }
+                } catch (Exception e)
+                {
+                    //
+                }
             }
         }
     }
