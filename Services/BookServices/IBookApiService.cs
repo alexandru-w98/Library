@@ -7,6 +7,6 @@ namespace Library.Services.BookServices
 {
     public interface IBookApiService
     {
-        IEnumerable<BookInfo> GetAllBooks();
+        IEnumerable<BookProductInfo> GetAllBooks();
     }
 }

@@ -44,13 +44,13 @@ namespace Library
                 Console.WriteLine("                Customer OPTIONS                 ");
                 Console.WriteLine("1. Show all books");
                 Console.WriteLine("2. Find the available quantity for a certain book");
-                Console.WriteLine("3. Lend a book");
+                Console.WriteLine("3. Borrow a book");
                 Console.WriteLine("4. Return a book");
 
                 Console.WriteLine("\n                  Admin OPTIONS                 ");
                 Console.WriteLine("5. Add a new book to the library");
                 Console.WriteLine("6. Update the quantity for an existing book");
-                Console.WriteLine("7. Show all lend books\n");
+                Console.WriteLine("7. Show all borrowed books\n");
                 Console.WriteLine("8. Exit\n");
                 Console.Write("Choose your option: ");
                 option = Console.ReadKey().KeyChar;
@@ -80,7 +80,7 @@ namespace Library
                         Console.Write("Enter the CNP: ");
                         cnp = Console.ReadLine();
 
-                        hasBeenBorrowed = library.Lend(isbn, cnp);
+                        hasBeenBorrowed = library.Borrow(isbn, cnp);
                         if (hasBeenBorrowed)
                         {
                             Console.WriteLine("You borrowed the book!");
@@ -161,7 +161,7 @@ namespace Library
 
                         break;
                     case '7':
-                        library.DisplayLendBooks();
+                        library.DisplayBorrowedBooks();
                         Console.WriteLine();
                         break;
                     case '8':

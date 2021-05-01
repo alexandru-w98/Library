@@ -13,58 +13,59 @@ namespace Library.Repositories
     public class LibraryRepository
     {
         private readonly IDependencyService _dependencyService;
-        public List<BookInfo> AvailableBooks { get; private set; }
-        public List<Loan> LendBooks { get; private set; }
+        public List<BookProductInfo> AvailableBooks { get; private set; }
+        public List<Borrowing> BorrowedBooks { get; private set; }
 
-        public LibraryRepository(List<BookInfo> availableBooks, IDependencyService dependencyService)
+        public LibraryRepository(List<BookProductInfo> availableBooks, IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
             AvailableBooks = availableBooks;
-            LendBooks = new List<Loan>();
+            BorrowedBooks = new List<Borrowing>();
         }
-        public LibraryRepository(List<Loan> lendBooks, IDependencyService dependencyService)
+        public LibraryRepository(List<Borrowing> lendBooks, IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
-            LendBooks = lendBooks;
+            BorrowedBooks = lendBooks;
 
-            Initialize();
+            GetApiBooks();
         }
-        public LibraryRepository(List<BookInfo> books, List<Loan> lendBooks, IDependencyService dependencyService)
+        public LibraryRepository(List<BookProductInfo> books, List<Borrowing> lendBooks, IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
             AvailableBooks = books;
-            LendBooks = lendBooks;
+            BorrowedBooks = lendBooks;
         }
         public LibraryRepository(IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
-            LendBooks = new List<Loan>();
+            BorrowedBooks = new List<Borrowing>();
 
-            Initialize();
+            GetApiBooks();
         }
 
-        private void Initialize()
+        private void GetApiBooks()
         {
             try
             {
-                AvailableBooks = new List<BookInfo>(_dependencyService.Get<IBookApiService>().GetAllBooks());
+                AvailableBooks = new List<BookProductInfo>(_dependencyService.Get<IBookApiService>().GetAllBooks());
             } catch(Exception e)
             {
-                AvailableBooks = new List<BookInfo>();
+                AvailableBooks = new List<BookProductInfo>();
             }
         }
 
-        public bool AddNewBook(Book book, double price)
+        public bool AddNewBook(Book book, double price, int quantity = 1)
         {
             var validationService = _dependencyService.Get<IValidationService>();
 
             if (validationService.isValidBook(book) &&
-                validationService.IsValidPrice(price))
+                validationService.IsValidPrice(price) &&
+                validationService.IsValidQuantity(quantity))
             {
                 var searchedIndex = AvailableBooks.FindIndex(item => item.Book.ISBN == book.ISBN);
                 if (searchedIndex == -1)
                 {
-                    AvailableBooks.Add(new BookInfo { Book = book, LoanPrice = price });
+                    AvailableBooks.Add(new BookProductInfo { Book = book, BorrowPrice = price, Quantity = quantity });
 
                     return true;
                 }
@@ -87,7 +88,7 @@ namespace Library.Repositories
             return false;
         }
 
-        public bool Lend(string isbn, string cnp)
+        public bool Borrow(string isbn, string cnp)
         {
             var searchedBookIndex = AvailableBooks.FindIndex(item => item.Book.ISBN == isbn);
 
@@ -98,13 +99,13 @@ namespace Library.Repositories
                 AvailableBooks[searchedBookIndex].Quantity--;
 
                 var currentDate = DateTimeOffset.UtcNow;
-                LendBooks.Add(new Loan
+                BorrowedBooks.Add(new Borrowing
                 {
                     CNP = cnp,
                     ISBN = isbn,
-                    LoanPrice = AvailableBooks[searchedBookIndex].LoanPrice,
-                    LoanStartDate = currentDate.ToUnixTimeMilliseconds().ToString(),
-                    LoanEndDate = currentDate.AddDays(AppConstants.MAX_LOAN_DAYS).ToUnixTimeMilliseconds().ToString()
+                    BorrowingPrice = AvailableBooks[searchedBookIndex].BorrowPrice,
+                    BorrowingStartDate = currentDate.ToUnixTimeMilliseconds().ToString(),
+                    BorrowingEndDate = currentDate.AddDays(AppConstants.MAX_LOAN_DAYS).ToUnixTimeMilliseconds().ToString()
                 });
                 return true;
             } else
@@ -115,13 +116,13 @@ namespace Library.Repositories
 
         public bool ReturnBook(string isbn, string cnp)
         {
-            var searchedBookIndex = LendBooks.FindIndex(item => item.CNP == cnp && item.ISBN == isbn);
+            var searchedBookIndex = BorrowedBooks.FindIndex(item => item.CNP == cnp && item.ISBN == isbn);
 
             if (searchedBookIndex != -1)
             {
                 if (AddExistingBook(isbn))
                 {
-                    LendBooks[searchedBookIndex].HasBeenReturned = true;
+                    BorrowedBooks[searchedBookIndex].HasBeenReturned = true;
 
                     return true;
                 } else
@@ -141,21 +142,21 @@ namespace Library.Repositories
                 Console.WriteLine("ISBN: " + bookInfo.Book.ISBN +
                     " Nume: " + bookInfo.Book.Name + 
                     " Quantity: " + bookInfo.Quantity +
-                    " Loan Price: " + bookInfo.LoanPrice);
+                    " Borrowing Price: " + bookInfo.BorrowPrice);
             }
         }
         
-        public void DisplayLendBooks()
+        public void DisplayBorrowedBooks()
         {
             string result = "";
-            foreach (var loan in LendBooks)
+            foreach (var borrowing in BorrowedBooks)
             {
-                result += "CNP: " + loan.CNP +
-                    " Loan Start: " + loan.LoanStartDate +
-                    " Loan Duration: " + loan.LoanEndDate +
-                    " Loan Price: " + loan.LoanPrice;
+                result += "CNP: " + borrowing.CNP +
+                    " Borrowing Start: " + borrowing.BorrowingStartDate +
+                    " Borrowing End: " + borrowing.BorrowingEndDate +
+                    " Borrowing Price: " + borrowing.BorrowingPrice;
 
-                result += loan.HasBeenReturned ? " Status: Returned" : " Status: Not Returned";
+                result += borrowing.HasBeenReturned ? " Status: Returned" : " Status: Not Returned";
             }
 
             Console.WriteLine(result);
@@ -178,13 +179,13 @@ namespace Library.Repositories
         {
             var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
 
-            foreach (var loan in LendBooks)
+            foreach (var borrowing in BorrowedBooks)
             {
                 try
                 {
-                    if (long.Parse(loan.LoanEndDate) <= long.Parse(currentTimestamp))
+                    if (long.Parse(borrowing.BorrowingEndDate) <= long.Parse(currentTimestamp))
                     {
-                        loan.LoanPrice += AppConstants.LOAN_PENALTY * loan.LoanPrice;
+                        borrowing.BorrowingPrice += AppConstants.LOAN_PENALTY * borrowing.BorrowingPrice;
                     }
                 } catch (Exception e)
                 {

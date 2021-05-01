@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Library.Models
 {
-    public class BookInfo
+    public class BookProductInfo
     {
         public Book Book { get; set; }
         public int Quantity { get; set; } = 1;
-        public double LoanPrice { get; set; }
+        public double BorrowPrice { get; set; }
     }
 }

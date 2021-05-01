@@ -7,11 +7,11 @@ namespace Library.Services.BookServices
 {
     public class BookApiService : IBookApiService
     {
-        public IEnumerable<BookInfo> GetAllBooks()
+        public IEnumerable<BookProductInfo> GetAllBooks()
         {
-            return new List<BookInfo>
+            return new List<BookProductInfo>
             {
-                new BookInfo
+                new BookProductInfo
                 {
                     Book = new Book
                     {
@@ -19,9 +19,9 @@ namespace Library.Services.BookServices
                         ISBN = "1234567890123"
                     },
                     Quantity = 3,
-                    LoanPrice = 10
+                    BorrowPrice = 10
                 },
-                new BookInfo
+                new BookProductInfo
                 {
                     Book = new Book
                     {
@@ -29,9 +29,9 @@ namespace Library.Services.BookServices
                         ISBN = "1234567390123"
                     },
                     Quantity = 2,
-                    LoanPrice = 20
+                    BorrowPrice = 20
                 },
-                new BookInfo
+                new BookProductInfo
                 {
                     Book = new Book
                     {
@@ -39,7 +39,7 @@ namespace Library.Services.BookServices
                         ISBN = "1234565890123"
                     },
                     Quantity = 1,
-                    LoanPrice = 15
+                    BorrowPrice = 15
                 }
             };
         }
