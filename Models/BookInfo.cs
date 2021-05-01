@@ -8,5 +8,6 @@ namespace Library.Models
     {
         public Book Book { get; set; }
         public int Quantity { get; set; } = 1;
+        public double LoanPrice { get; set; }
     }
 }

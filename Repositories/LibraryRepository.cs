@@ -13,13 +13,13 @@ namespace Library.Repositories
     public class LibraryRepository
     {
         private readonly IDependencyService _dependencyService;
-        public List<BookInfo> Books { get; private set; }
+        public List<BookInfo> AvailableBooks { get; private set; }
         public List<Loan> LendBooks { get; private set; }
 
         public LibraryRepository(List<BookInfo> availableBooks, IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
-            Books = availableBooks;
+            AvailableBooks = availableBooks;
             LendBooks = new List<Loan>();
         }
         public LibraryRepository(List<Loan> lendBooks, IDependencyService dependencyService)
@@ -32,66 +32,40 @@ namespace Library.Repositories
         public LibraryRepository(List<BookInfo> books, List<Loan> lendBooks, IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
-            Books = books;
+            AvailableBooks = books;
             LendBooks = lendBooks;
         }
         public LibraryRepository(IDependencyService dependencyService)
         {
             _dependencyService = dependencyService;
+            LendBooks = new List<Loan>();
 
             Initialize();
-            LendBooks = new List<Loan>();
         }
 
         private void Initialize()
         {
             try
             {
-                Books = new List<BookInfo>(_dependencyService.Get<IBookApiService>().GetAllBooks());
+                AvailableBooks = new List<BookInfo>(_dependencyService.Get<IBookApiService>().GetAllBooks());
             } catch(Exception e)
             {
-                Books = new List<BookInfo>();
+                AvailableBooks = new List<BookInfo>();
             }
         }
 
-        public bool Add(Book book)
+        public bool AddNewBook(Book book, double price)
         {
-            if (_dependencyService.Get<IValidationService>().isValidBook(book))
+            var validationService = _dependencyService.Get<IValidationService>();
+
+            if (validationService.isValidBook(book) &&
+                validationService.IsValidPrice(price))
             {
-                var searchedIndex = Books.FindIndex(item => item.Book.ISBN == book.ISBN);
+                var searchedIndex = AvailableBooks.FindIndex(item => item.Book.ISBN == book.ISBN);
                 if (searchedIndex == -1)
                 {
-                    Books.Add(new BookInfo { Book = book });
-                } else
-                {
-                    Books[searchedIndex].Quantity++;
-                }
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
+                    AvailableBooks.Add(new BookInfo { Book = book, LoanPrice = price });
 
-        public bool Add(string isbn, int quantity = 1)
-        {
-            var bookIndex = Books.FindIndex(item => item.Book.ISBN == isbn);
-
-            if (bookIndex != -1)
-            {
-                var book = Books[bookIndex].Book;
-
-                if (_dependencyService.Get<IValidationService>().isValidBook(book))
-                {
-                    var searchedIndex = Books.FindIndex(item => item.Book.ISBN == book.ISBN);
-                    if (searchedIndex == -1)
-                    {
-                        Books.Add(new BookInfo { Book = book });
-                    }
-                    else
-                    {
-                        Books[searchedIndex].Quantity++;
-                    }
                     return true;
                 }
             }
@@ -99,15 +73,29 @@ namespace Library.Repositories
             return false;
         }
 
+        public bool AddExistingBook(string isbn, int quantity = 1)
+        {
+            var bookIndex = AvailableBooks.FindIndex(item => item.Book.ISBN == isbn);
+
+            if ((bookIndex != -1) &&
+                _dependencyService.Get<IValidationService>().IsValidQuantity(quantity))
+            {
+                AvailableBooks[bookIndex].Quantity += quantity;
+                return true;
+            }
+
+            return false;
+        }
+
         public bool Lend(string isbn, string cnp)
         {
-            var searchedBookIndex = Books.FindIndex(item => item.Book.ISBN == isbn);
+            var searchedBookIndex = AvailableBooks.FindIndex(item => item.Book.ISBN == isbn);
 
             if (searchedBookIndex != -1 &&
-                Books[searchedBookIndex].Quantity > 0 &&
+                AvailableBooks[searchedBookIndex].Quantity > 0 &&
                 _dependencyService.Get<IValidationService>().IsValidCNP(cnp))
             {
-                Books[searchedBookIndex].Quantity--;
+                AvailableBooks[searchedBookIndex].Quantity--;
 
                 var currentDate = DateTimeOffset.UtcNow;
                 LendBooks.Add(new Loan
@@ -129,7 +117,7 @@ namespace Library.Repositories
 
             if (searchedBookIndex != -1)
             {
-                if (Add(isbn))
+                if (AddExistingBook(isbn))
                 {
                     LendBooks[searchedBookIndex].HasBeenReturned = true;
 

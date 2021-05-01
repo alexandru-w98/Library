@@ -61,8 +61,7 @@ namespace Library.Services.Validation
         public bool isValidBook(Book book)
         {
             if (IsValidISBN(book.ISBN) && 
-                IsValidName(book.Name) &&
-                IsValidPrice(book.LoanPrice))
+                IsValidName(book.Name))
             {
                 return true;
             } else
@@ -74,6 +73,16 @@ namespace Library.Services.Validation
         public bool IsValidCNP(string cnp)
         {
             // cnp validation
+            return true;
+        }
+
+        public bool IsValidQuantity(int quantity)
+        {
+            if (quantity < 0)
+            {
+                return false;
+            }
+
             return true;
         }
     }

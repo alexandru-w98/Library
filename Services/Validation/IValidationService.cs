@@ -11,6 +11,7 @@ namespace Library.Services.Validation
         bool IsValidName(string name);
         bool IsValidISBN(string isbn);
         bool IsValidPrice(double price);
+        bool IsValidQuantity(int quantity);
         bool IsDigitsOnly(string input);
         bool IsValidCNP(string cnp);
     }
